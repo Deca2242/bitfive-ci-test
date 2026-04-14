@@ -47,7 +47,7 @@ export class AuthorizationController {
         const userFound = await this.userService.findByUsername(username)
         if (!userFound) throw new NotFoundError(`El usuario "${username}" que intenta autorizar no existe`)
 
-        const user = await this.userService.update(userFound.id, { isAuthorized: true })
+        const user = await this.userService.update(username, { isAuthorized: true })
 
         return response.status(200).json({ ...(new UserDTO(user)), message: `El usuario "${user.name}" ha sido autorizado exitosamente` })
     }
@@ -64,7 +64,7 @@ export class AuthorizationController {
 
         if (userFound.id === request.user.id) throw new ForbiddenError('No puedes desautorizarte a ti mismo')
 
-        const user = await this.userService.update(userFound.id, { isAuthorized: false })
+        const user = await this.userService.update(username, { isAuthorized: false })
 
         return response.status(200).json({ ...(new UserDTO(user)), message: `El usuario "${user.name}" ha sido desautorizado exitosamente` })
     }
