@@ -59,14 +59,27 @@ export class User {
     @Column({ type: 'boolean', nullable: false, default: false })
     isOnline: boolean
 
-    @Column({ type: 'boolean', nullable: false, default: true })
-    isActive: boolean
 
     @OneToMany(() => BlockedToken, 'userId')
     blockedTokens: BlockedToken[]
 
-    @Column({ type: 'boolean', nullable: false, default: false })
+    status: string
+
+    isActive: boolean
+
     isDeleted: boolean
+
+    createdAt: Date
+
+    createdBy: string
+
+    updatedAt: Date
+
+    updatedBy: string
+
+    deletedAt: Date
+
+    deletedBy: string
 
     @ManyToMany(() => Role, {
         joinTable: {

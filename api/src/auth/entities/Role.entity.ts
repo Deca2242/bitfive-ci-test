@@ -17,11 +17,23 @@ export class Role {
     @Column({ type: 'string', nullable: true })
     description: string
 
-    @Column({ type: 'boolean', nullable: false, default: true })
+    status: string
+
     isActive: boolean
 
-    @Column({ type: 'boolean', nullable: false, default: false })
     isDeleted: boolean
+
+    createdAt: Date
+
+    createdBy: string
+
+    updatedAt: Date
+
+    updatedBy: string
+
+    deletedAt: Date
+
+    deletedBy: string
 
     @ManyToMany(() => Permission, {
         joinTable: {
