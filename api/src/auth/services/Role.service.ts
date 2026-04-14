@@ -146,7 +146,7 @@ export class RoleService {
     async check(roles: string[], username: string) {
 
         const userFound = await this.userRepository.findOneBy('username', username)
-        if (!userFound) throw new NotFoundError(`El usuario "${username}" al que intenta verificar users no existe`)
+        if (!userFound) throw new NotFoundError(`El usuario "${username}" al que intenta verificar no existe`)
 
         const rolesFounds = []
 
