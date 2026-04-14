@@ -55,19 +55,18 @@ export class UserController {
     @Permissions([PERMISSIONS.USER.UPDATE])
     async update(request, response) {
         const { username } = request.params
-        const { name, documentType, documentNumber, gender, country, city, address, phoneNumber, email, password, birthdate, image } = request.body
+        const { name, documentType, documentNumber, gender, country, city, address, phoneNumber, email, birthdate, image } = request.body
 
         Validator
             .required({ name, username, email, documentType, documentNumber, phoneNumber })
             .isAlfaNumeric({ username })
             .email({ email })
             .length({ username }, 2, 50)
-            .isStrongPassword({ password })
             .isDate({ birthdate })
 
         if (image) Validator.url({ image })
 
-        const user = await this.userService.update(username, { name, username, documentType, documentNumber, gender, country, city, address, phoneNumber, email, password, birthdate, image })
+        const user = await this.userService.update(username, { name, username, documentType, documentNumber, gender, country, city, address, phoneNumber, email, birthdate, image })
 
         return response.status(200).json(user)
     }
