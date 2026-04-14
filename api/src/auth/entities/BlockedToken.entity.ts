@@ -13,11 +13,23 @@ export class BlockedToken {
     @Column({ type: 'date' })
     expiration: Date
 
-    @Column({ type: 'boolean', nullable: false, default: true })
+    status: string
+
     isActive: boolean
 
-    @Column({ type: 'boolean', nullable: false, default: false })
     isDeleted: boolean
+
+    createdAt: Date
+
+    createdBy: string
+
+    updatedAt: Date
+
+    updatedBy: string
+
+    deletedAt: Date
+
+    deletedBy: string
 
     @ManyToOne(() => User, {
         inverse: 'blockedTokens',
