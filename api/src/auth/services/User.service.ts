@@ -92,8 +92,8 @@ export class UserService {
         let roles = await this.roleRepository.findManyByUserId(user.id)
         let permissions = await this.permissionRepository.findManyByUserId(user.id)
 
-        roles = [...new Set(roles.map(role => role.name))]
-        permissions = [...new Set(permissions.map(permission => permission.name))]
+        roles = [...new Set(roles.filter(role => role.isActive).map(role => role.name))]
+        permissions = [...new Set(permissions.filter(permission => permission.isActive).map(permission => permission.name))]
 
         const token = jwt.sign({
             userId: user.id,
