@@ -64,20 +64,20 @@ export class UserService {
         return await this.userRepository.update(user.id, user)
     }
 
-    async update(id: string, user: Partial<User>) {
-        const userExists = await this.userRepository.findById(id)
+    async update(username: string, user: Partial<User>) {
+        const userExists = await this.userRepository.findOneBy('username', username)
 
-        if (!userExists) throw new NotFoundError('El usuario no existe')
+        if (!userExists) throw new NotFoundError(`El usuario "${username}" no existe`)
 
-        return await this.userRepository.update(id, user)
+        return await this.userRepository.update(userExists.id, user)
     }
 
-    async delete(id: string) {
-        const user = await this.userRepository.findById(id)
+    async delete(username: string) {
+        const user = await this.userRepository.findOneBy('username', username)
 
-        if (!user) throw new NotFoundError('El usuario no existe')
+        if (!user) throw new NotFoundError(`El usuario "${username}" no existe`)
 
-        return await this.userRepository.delete(id)
+        return await this.userRepository.delete(user.id)
     }
 
     async login({ username, password }) {
@@ -115,8 +115,8 @@ export class UserService {
         const decoded = jwt.decode(token)
         const expiration =
             decoded &&
-            typeof decoded !== 'string' &&
-            typeof decoded.exp === 'number'
+                typeof decoded !== 'string' &&
+                typeof decoded.exp === 'number'
                 ? new Date(decoded.exp * 1000)
                 : new Date()
 
