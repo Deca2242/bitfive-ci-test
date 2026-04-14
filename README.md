@@ -49,6 +49,9 @@ npm run dev --prefix app   # http://localhost:5173
 
 ## Estructura del Monorepo
 
+![WhatsApp Image 2026-04-13 at 11 06 12 PM](https://github.com/user-attachments/assets/a889c7fb-8dc9-4fa9-a702-a665fbf7af8b)
+
+
 ```
 bitfive/
 ├── api/          # Backend — Express 5, TypeScript, ORM custom, PostgreSQL
