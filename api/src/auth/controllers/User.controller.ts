@@ -1,6 +1,7 @@
 import { Controller, Delete, Get, Inject, Permissions, Post, Put } from '../../core/decorators/decorators.js'
 import Validator from '../../core/utils/Validator.js'
 import { PERMISSIONS } from '../constants/authorities.js'
+import UserDTO from '../dtos/User.dto.js'
 import UserService from '../services/User.service.js'
 
 @Controller('/auth/users')
@@ -16,7 +17,7 @@ export class UserController {
     async findAll(request, response) {
         const users = await this.userService.findAll()
 
-        return response.status(200).json(users)
+        return response.status(200).json(users.map(user => new UserDTO(user)))
     }
 
     @Get('/:username')
