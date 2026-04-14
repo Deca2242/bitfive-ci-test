@@ -9,6 +9,7 @@ import User from "../entities/User.entity.js"
 import { NotFoundError } from '../../core/errors/NotFound.error.js'
 import { UnauthorizedError } from '../../core/errors/Unauthorized.error.js'
 import { InvalidCredentialError } from '../../core/errors/InvalidCredentials.error.js'
+import { AlreadyExistError } from '../../core/errors/AlreadyExist.error.js'
 
 @Service()
 export class UserService {
@@ -45,6 +46,9 @@ export class UserService {
     }
 
     async register(user: Partial<User>, roleName: string = 'Guest') {
+
+        const userExists = await this.userRepository.findOneBy('username', user.username)
+        if (userExists) throw new AlreadyExistError(`El usuario "${user.username}" ya existe`)
 
         const { password, ...rest } = user
         const hashedPassword = await bcrypt.hash(password, 10)
