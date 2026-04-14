@@ -123,7 +123,7 @@ export class UserService {
         await this.blockedTokenRepository.create({ token, expiration })
         const user = await this.userRepository.findById(userId)
 
-        if (user) await this.userRepository.update(user.id, { ...user, isOnline: false })
+        if (user) await this.userRepository.update(user.id, { isOnline: false })
     }
 
     async reset(userId: string, oldPassword: string, newPassword: string) {
