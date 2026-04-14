@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Permissions, Inject } from '../../core/decorators/decorators.js'
 import { ForbiddenError } from '../../core/errors/Forbidden.error.js'
 import { NotFoundError } from '../../core/errors/NotFound.error.js'
+import Validator from '../../core/utils/Validator.js'
 import { PERMISSIONS } from '../constants/authorities.js'
 import UserDTO from '../dtos/User.dto.js'
 import PermissionService from '../services/Permission.service.js'
@@ -41,10 +42,12 @@ export class AuthorizationController {
     async authorize(request, response) {
         const { username } = request.params || {}
 
+        Validator.required({ username })
+
         const userFound = await this.userService.findByUsername(username)
         if (!userFound) throw new NotFoundError(`El usuario "${username}" que intenta autorizar no existe`)
 
-        const user = await this.userService.update(userFound.id, { ...userFound, isAuthorized: true })
+        const user = await this.userService.update(userFound.id, { isAuthorized: true })
 
         return response.status(200).json({ ...(new UserDTO(user)), message: `El usuario "${user.name}" ha sido autorizado exitosamente` })
     }
@@ -54,12 +57,14 @@ export class AuthorizationController {
     async disauthorize(request, response) {
         const { username } = request.params || {}
 
+        Validator.required({ username })
+
         const userFound = await this.userService.findByUsername(username)
         if (!userFound) throw new NotFoundError(`El usuario "${username}" que intenta desautorizar no existe`)
 
         if (userFound.id === request.user.id) throw new ForbiddenError('No puedes desautorizarte a ti mismo')
 
-        const user = await this.userService.update(userFound.id, { ...userFound, isAuthorized: false })
+        const user = await this.userService.update(userFound.id, { isAuthorized: false })
 
         return response.status(200).json({ ...(new UserDTO(user)), message: `El usuario "${user.name}" ha sido desautorizado exitosamente` })
     }
