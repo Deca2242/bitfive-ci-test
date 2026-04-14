@@ -142,7 +142,7 @@ export class RoleService {
         }
 
         for (const roleFound of rolesFounds) {
-            if (!userFound.roles.find(p => p.id === roleFound.id)) throw new NotFoundError(`El usuario "${userFound.name}" no tiene el rol "${roleFound.name}" asignado`)
+            if (!userFound.roles.find(p => p.id === roleFound.id)) throw new ForbiddenError(`El usuario "${userFound.name}" no tiene el rol "${roleFound.name}" asignado`)
         }
 
         await this.userRepository.update(userFound.id, { ...userFound, roles: userFound.roles.filter(p => !rolesFounds.map(pf => pf.id).includes(p.id)) })

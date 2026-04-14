@@ -108,7 +108,7 @@ export class PermissionService {
         }
 
         for (const permissionFound of permissionsFounds) {
-            if (!roleFound.permissions.find(p => p.id === permissionFound.id)) throw new NotFoundError(`El rol "${roleFound.name}" no tiene el permiso "${permissionFound.name}" asignado`)
+            if (!roleFound.permissions.find(p => p.id === permissionFound.id)) throw new ForbiddenError(`El rol "${roleFound.name}" no tiene el permiso "${permissionFound.name}" asignado`)
         }
 
         await this.roleRepository.update(roleFound.id, { ...roleFound, permissions: roleFound.permissions.filter(p => !permissionsFounds.map(pf => pf.id).includes(p.id)) })
