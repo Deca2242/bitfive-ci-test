@@ -135,7 +135,7 @@ export class UserService {
 
         const hashedPassword = await bcrypt.hash(newPassword, 10)
 
-        return await this.userRepository.update(user.id, { ...user, password: hashedPassword })
+        return await this.userRepository.update(user.id, { password: hashedPassword })
     }
 
 }
