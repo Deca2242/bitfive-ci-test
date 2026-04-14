@@ -1,11 +1,8 @@
-import { Column } from "../../core/orm/decorators/column.decorator.js"
-import { ManyToOne } from "../../core/orm/decorators/decorators.js"
-import { Entity } from "../../core/orm/decorators/entity.decorator.js"
-import { Id } from "../../core/orm/decorators/id.decorator.js"
+import { Entity, ManyToOne, Id, Column } from "../../core/orm/decorators/decorators.js"
 import Event from "../../event/entitys/Event.entity.js"
 
 
-@Entity('parkings')
+@Entity('Parkings')
 export class Parking {
 
   @Id()
