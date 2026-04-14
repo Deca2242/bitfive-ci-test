@@ -1,7 +1,7 @@
 INSERT INTO "Roles" ("id", "name", "alias", "description") VALUES
 ('f47c8902-775f-4e03-8974-eaedc00dfa97', 'Guest', 'Invitado', 'Usuario invitado con acceso mínimo'),
 ('f60fb7a5-673d-4f3e-af61-b800a79469a5', 'User', 'Usuario', 'Usuario regular con acceso limitado'),
-('5296f982-f8b4-4e9a-9ed9-89672f2c3700', 'Admin', 'Administrador', 'Usuario administrador con acceso completo'),
+('5296f982-f8b4-4e9a-9ed9-89672f2c3700', 'Admin', 'Administrador', 'Usuario administrador con acceso completo');
 
 INSERT INTO "Permissions" ("id", "name", "alias", "description", "type") VALUES
 ('039e767c-1f63-455b-b9d0-153303c737f5',  'ReadPermissions',           'Leer Permisos',              'Permite la lectura de permisos.', 'Read'),
