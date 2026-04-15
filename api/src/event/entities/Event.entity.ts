@@ -14,6 +14,9 @@ export class Event {
     @Column({ type: 'string' })
     description: string
 
+    @Column({ type: 'string', nullable: false })
+    location: string
+
     @Column({ type: 'date', nullable: false })
     date: Date
 
