@@ -1,4 +1,5 @@
 import User from "../../auth/entities/User.entity.js"
+import Parking from "../../parking/entities/Parking.entity.js"
 import { Entity, Id, Column, ManyToMany } from "../../core/orm/decorators/decorators.js"
 
 @Entity('Events')
@@ -28,9 +29,6 @@ export class Event {
     @Column({ type: 'boolean', default: false })
     hasParking: boolean
 
-    @Column({ type: 'boolean', default: false })
-    parkingSlots: boolean
-
     isActive: boolean
 
     isDeleted: boolean
@@ -57,6 +55,17 @@ export class Event {
         eager: true
     })
     organizers: User[]
+
+    @ManyToMany(() => Parking, {
+        joinTable: {
+            name: "EventsParkings",
+            joinColumn: "eventId",
+            inverseJoinColumn: "parkingId"
+        },
+        owner: true,
+        eager: true
+    })
+    parkings: Parking[]
 
 }
 
