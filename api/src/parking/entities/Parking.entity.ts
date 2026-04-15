@@ -1,5 +1,5 @@
-import { Entity, ManyToOne, Id, Column } from "../../core/orm/decorators/decorators.js"
-import Event from "../../event/entitys/Event.entity.js"
+import { Entity, ManyToMany, Id, Column } from "../../core/orm/decorators/decorators.js"
+import Event from "../../event/entities/Event.entity.js"
 
 
 @Entity('Parkings')
@@ -9,9 +9,6 @@ export class Parking {
   id: string
 
   @Column({ type: 'string', nullable: false })
-  eventId: string
-
-  @Column({ type: 'string' })
   location: string
 
   @Column({ type: 'number', nullable: false, default: 0 })
@@ -36,8 +33,14 @@ export class Parking {
 
   deletedBy: string
 
-  @ManyToOne(() => Event, { joinColumn: 'eventId', eager: true })
-  event: Event
+  @ManyToMany(() => Event, {
+    joinTable: {
+      name: "EventsParkings",
+      joinColumn: "parkingId",
+      inverseJoinColumn: "eventId"
+    },
+  })
+  events: Event[]
 }
 
 export default Parking
