@@ -3,6 +3,7 @@ import EventRepository from "../repositories/Event.repository.js";
 import Event from "../entities/Event.entity.js";
 import { NotFoundError } from '../../core/errors/NotFound.error.js'
 import { Inject } from "../../core/decorators/inject.decorator.js";
+
 @Service()
 export class EventService {
 
@@ -17,6 +18,14 @@ export class EventService {
 
     async findById(id: string) {
         const event = await this.eventRepository.findById(id)
+        if (!event) {
+            throw new NotFoundError("Event not found")
+        }
+        return event
+    }
+
+    async findByIdWithParkings(id: string) {
+        const event = await this.eventRepository.findById(id, false, { relations: ['parkings'] })
         if (!event) {
             throw new NotFoundError("Event not found")
         }
