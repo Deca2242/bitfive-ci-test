@@ -1,6 +1,7 @@
 import Dashboard from '../pages/Dashboard/Dashboard'
 import Users from '../pages/Users/Users'
 import Authorization from '../pages/Authorization/Authorization'
+import Events from '../pages/Events/Events'
 
 export const AUTHORITIES = {
   PANEL: {
@@ -43,6 +44,18 @@ export const MENU = [
     element: <Users />,
     authorities: {
       permissions: ['AccessUsers']
+    },
+    items: []
+  }, 
+  {
+    label: 'Eventos',
+    icon: 'event',
+    description: 'Gestión de eventos',
+    to: 'Events',
+    path: 'events/:eventId?',
+    element: <Events />,
+    authorities: {
+      permissions: ['AccessEvents']
     },
     items: []
   }
