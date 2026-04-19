@@ -143,7 +143,7 @@ export class BaseRepository<T extends { id?: string;[key: string]: any }> {
         for (const [propName, relConfig] of Object.entries(relations)) {
             if (data[propName] === undefined) continue;
 
-            if (relConfig.type === 'ManyToMany') {
+            if (relConfig.type === 'ManyToMany' && relConfig.owner) {
                 const targetElements = data[propName] as any[];
                 if (!Array.isArray(targetElements)) continue;
 
