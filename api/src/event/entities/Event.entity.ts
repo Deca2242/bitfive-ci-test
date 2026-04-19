@@ -1,4 +1,5 @@
 import User from "../../auth/entities/User.entity.js"
+import Parking from "../../parking/entities/Parking.entity.js"
 import { Entity, Id, Column, ManyToMany } from "../../core/orm/decorators/decorators.js"
 
 @Entity('Events')
@@ -13,11 +14,32 @@ export class Event {
     @Column({ type: 'string' })
     description: string
 
-    @Column({ type: 'date', nullable: false })
-    date: Date
+    @Column({ type: 'string' })
+    category: string
+
+    @Column({ type: 'string' })
+    cover: string
+
+    @Column({ type: 'string' })
+    color: string
 
     @Column({ type: 'string', nullable: false })
-    dateTime: Date
+    location: string
+
+    @Column({ type: 'date', nullable: false })
+    startAt: Date
+
+    @Column({ type: 'date', nullable: false })
+    endAt: Date
+
+    @Column({ type: 'string', nullable: false })
+    timezone: string
+
+    @Column({ type: 'string' })
+    type: string
+
+    @Column({ type: 'string' })
+    visibility: string
 
     @Column({ type: 'boolean', default: false })
     eventStatus: boolean
@@ -28,8 +50,8 @@ export class Event {
     @Column({ type: 'boolean', default: false })
     hasParking: boolean
 
-    @Column({ type: 'boolean', default: false })
-    parkingSlots: boolean
+    @Column({ type: 'number', default: 0 })
+    price: number
 
     isActive: boolean
 
@@ -57,6 +79,17 @@ export class Event {
         eager: true
     })
     organizers: User[]
+
+    @ManyToMany(() => Parking, {
+        joinTable: {
+            name: "EventsParkings",
+            joinColumn: "eventId",
+            inverseJoinColumn: "parkingId"
+        },
+        owner: true,
+        eager: true
+    })
+    parkings: Parking[]
 
 }
 

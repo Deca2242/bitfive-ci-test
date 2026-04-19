@@ -1,20 +1,23 @@
-import { Column } from "../../core/orm/decorators/column.decorator.js"
-import { ManyToOne } from "../../core/orm/decorators/decorators.js"
-import { Entity } from "../../core/orm/decorators/entity.decorator.js"
-import { Id } from "../../core/orm/decorators/id.decorator.js"
-import Event from "../../event/entitys/Event.entity.js"
+import { Entity, ManyToMany, Id, Column } from "../../core/orm/decorators/decorators.js"
+import Event from "../../event/entities/Event.entity.js"
 
 
-@Entity('parkings')
+@Entity('Parkings')
 export class Parking {
 
   @Id()
   id: string
 
   @Column({ type: 'string', nullable: false })
-  eventId: string
+  name: string
 
-  @Column({ type: 'string' })
+  @Column({ type: 'string', nullable: true })
+  description: string
+
+  @Column({ type: 'string', nullable: true })
+  type: string
+
+  @Column({ type: 'string', nullable: false })
   location: string
 
   @Column({ type: 'number', nullable: false, default: 0 })
@@ -39,8 +42,14 @@ export class Parking {
 
   deletedBy: string
 
-  @ManyToOne(() => Event, { joinColumn: 'eventId', eager: true })
-  event: Event
+  @ManyToMany(() => Event, {
+    joinTable: {
+      name: "EventsParkings",
+      joinColumn: "parkingId",
+      inverseJoinColumn: "eventId"
+    }
+  })
+  events: Event[]
 }
 
 export default Parking
