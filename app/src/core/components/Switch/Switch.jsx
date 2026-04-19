@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import './Switch.css';
 
-const Switch = ({ checked = false, action = async (setCheck) => {setCheck(isCheck => !isCheck)} }) => {
+const Switch = ({ checked = false, action = async (setCheck) => { setCheck(isCheck => !isCheck) } }) => {
   const [isCheck, setCheck] = useState(checked);
 
   const handleAction = async (event) => {
