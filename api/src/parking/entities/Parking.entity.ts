@@ -1,5 +1,6 @@
-import { Entity, ManyToMany, Id, Column } from "../../core/orm/decorators/decorators.js"
+import { Entity, ManyToMany, OneToMany, Id, Column } from "../../core/orm/decorators/decorators.js"
 import Event from "../../event/entities/Event.entity.js"
+import Slot from "./Slot.entity.js"
 
 
 @Entity('Parkings')
@@ -50,6 +51,9 @@ export class Parking {
     }
   })
   events: Event[]
+
+  @OneToMany(() => Slot, 'parkingId')
+  slots: Slot[]
 }
 
 export default Parking

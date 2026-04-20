@@ -3,6 +3,7 @@ import ParkingRepository from "../repositories/Parking.repository.js"
 import Parking from "../entities/Parking.entity.js"
 import { NotFoundError } from "../../core/errors/NotFound.error.js"
 import EventRepository from "../../event/repositories/Event.repository.js"
+import SlotService from "./Slot.service.js"
 
 @Service()
 export class ParkingService {
@@ -11,7 +12,9 @@ export class ParkingService {
         @Inject(ParkingRepository)
         private parkingRepository: ParkingRepository,
         @Inject(EventRepository)
-        private eventRepository: EventRepository
+        private eventRepository: EventRepository,
+        @Inject(SlotService)
+        private slotService: SlotService
     ) { }
 
     async findAll() {
@@ -35,7 +38,13 @@ export class ParkingService {
     }
 
     async create(data: Partial<Parking>) {
-        return await this.parkingRepository.create(data)
+        const parking = await this.parkingRepository.create(data)
+
+        if (parking.capacity && parking.capacity > 0) {
+            await this.slotService.generateForParking(parking.id, parking.capacity)
+        }
+
+        return parking
     }
 
     async addEvent(parkingId: string, eventId: string) {
@@ -71,7 +80,14 @@ export class ParkingService {
 
         if (!parking) throw new NotFoundError(`El parqueadero con id "${id}" no existe`)
 
-        return await this.parkingRepository.update(id, data)
+        const updated = await this.parkingRepository.update(id, data)
+
+        if (data.capacity && data.capacity > parking.capacity) {
+            const diff = data.capacity - parking.capacity
+            await this.slotService.generateAdditional(id, parking.capacity, diff, data.capacity)
+        }
+
+        return updated
     }
 
     async delete(id: string) {
