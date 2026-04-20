@@ -58,8 +58,9 @@ export class EventController {
             .required({ name, description, category, cover, color, location, startAt, endAt, timezone, type, visibility, eventStatus, maxCapacity, hasParking, price })
             .isDate({ startAt, endAt })
             .isNumeric({ maxCapacity, price })
+            .isIn({ eventStatus }, ['AVAILABLE', 'FINISHED', 'CANCELLED'])
 
-        if (Number(maxCapacity) <= 0) {
+      if (Number(maxCapacity) <= 0) {
             throw new InvalidFormatError('El campo "maxCapacity" debe ser mayor a 0')
         }
 
@@ -96,8 +97,9 @@ export class EventController {
             .required({ name, description, category, cover, color, location, startAt, endAt, timezone, type, visibility, eventStatus, maxCapacity, hasParking, price })
             .isDate({ startAt, endAt })
             .isNumeric({ maxCapacity, price })
+            .isIn({ eventStatus }, ['AVAILABLE', 'FINISHED', 'CANCELLED'])
 
-        if (Number(maxCapacity) <= 0) {
+      if (Number(maxCapacity) <= 0) {
             throw new InvalidFormatError('El campo "maxCapacity" debe ser mayor a 0')
         }
 
