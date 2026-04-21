@@ -53,7 +53,13 @@ export class SlotController {
             .required({ code, parkingId })
             .isUUID({ parkingId })
 
-        const slot = await this.slotService.create({ code, parkingId, isOccupied: Boolean(isOccupied) })
+        if (isOccupied !== undefined) Validator.isBoolean({ isOccupied })
+
+        const slot = await this.slotService.create({
+            code,
+            parkingId,
+            ...(isOccupied !== undefined && { isOccupied })
+        })
 
         return response.status(201).json(new SlotDTO(slot))
     }
@@ -65,7 +71,7 @@ export class SlotController {
         const { code, isOccupied } = request.body || {}
 
         Validator
-            .required({ id, code })
+            .required({ id, code, isOccupied })
             .isUUID({ id })
             .isBoolean({ isOccupied })
 
