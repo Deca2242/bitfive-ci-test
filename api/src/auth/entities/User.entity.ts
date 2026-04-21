@@ -1,4 +1,5 @@
 import { Entity, Id, Column, OneToMany, ManyToMany } from "../../core/orm/decorators/decorators.js"
+import Enrollment from "../../enrollment/entities/Enrollment.entity.js"
 import Event from "../../event/entities/Event.entity.js"
 import BlockedToken from "./BlockedToken.entity.js"
 import Role from "./Role.entity.js"
@@ -104,6 +105,8 @@ export class User {
     })
     organizedEvents: Event[]
 
+    @OneToMany(() => Enrollment, 'userId')
+    enrollments: Enrollment[]
 }
 
 export default User

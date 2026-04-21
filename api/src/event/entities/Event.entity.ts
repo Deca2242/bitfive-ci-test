@@ -1,6 +1,7 @@
 import User from "../../auth/entities/User.entity.js"
 import Parking from "../../parking/entities/Parking.entity.js"
-import { Entity, Id, Column, ManyToMany, ManyToOne } from "../../core/orm/decorators/decorators.js"
+import { Entity, Id, Column, ManyToMany, ManyToOne, OneToMany } from "../../core/orm/decorators/decorators.js"
+import Enrollment from "../../enrollment/entities/Enrollment.entity.js"
 
 @Entity('Events')
 export class Event {
@@ -98,6 +99,13 @@ export class Event {
         eager: true
     })
     parkings: Parking[]
+
+    @OneToMany(() => Enrollment, {
+        inverse: 'event',
+        joinColumn: 'eventId',
+        eager: true
+    })
+    enrollments: Enrollment[]
 
 }
 
