@@ -63,18 +63,12 @@ export class EventController {
         const { name, description, category, cover, color, location, startAt, endAt, timezone, type, visibility, eventStatus, maxCapacity, hasParking, price } = request.body
 
         Validator
-            .required({ name, description, category, cover, color, location, startAt, endAt, timezone, type, visibility, eventStatus, maxCapacity, hasParking, price })
-            .isNumeric({ maxCapacity, price })
+            .required({ name, description, category, color, location, startAt, endAt, type, visibility, eventStatus, maxCapacity, hasParking, price })
+            .isInteger({ maxCapacity, price })
             .isDateTime({ startAt, endAt })
             .isIn({ eventStatus }, ['AVAILABLE', 'FINISHED', 'CANCELLED'])
-
-        if (Number(maxCapacity) <= 0) {
-            throw new InvalidFormatError('El campo "maxCapacity" debe ser mayor a 0')
-        }
-
-        if (Number(price) < 0) {
-            throw new InvalidFormatError('El campo "price" debe ser mayor o igual a 0')
-        }
+            .isGreaterThan({ maxCapacity }, 0)
+            .isGreaterThanOrEqual({ price }, 0)
 
         this._validateEventDates(startAt, endAt)
 
@@ -90,18 +84,12 @@ export class EventController {
         const { name, description, category, cover, color, location, startAt, endAt, timezone, type, visibility, eventStatus, maxCapacity, hasParking, price } = request.body
 
         Validator
-            .required({ name, description, category, cover, color, location, startAt, endAt, timezone, type, visibility, eventStatus, maxCapacity, hasParking, price })
+            .required({ name, description, category, color, location, startAt, endAt, type, visibility, eventStatus, maxCapacity, hasParking, price })
             .isNumeric({ maxCapacity, price })
             .isDateTime({ startAt, endAt })
             .isIn({ eventStatus }, ['AVAILABLE', 'FINISHED', 'CANCELLED'])
-
-        if (Number(maxCapacity) <= 0) {
-            throw new InvalidFormatError('El campo "maxCapacity" debe ser mayor a 0')
-        }
-
-        if (Number(price) < 0) {
-            throw new InvalidFormatError('El campo "price" debe ser mayor o igual a 0')
-        }
+            .isGreaterThan({ maxCapacity }, 0)
+            .isGreaterThanOrEqual({ price }, 0)
 
         this._validateEventDates(startAt, endAt)
 
