@@ -40,7 +40,7 @@ export class Enrollment {
         inverse: 'enrollments',
         joinColumn: 'userId',
         owner: true,
-        eager: false
+        eager: true
     })
     user: any
 
@@ -48,7 +48,7 @@ export class Enrollment {
         inverse: 'enrollments',
         joinColumn: 'eventId',
         owner: true,
-        eager: false
+        eager: true
     })
     event: any
 

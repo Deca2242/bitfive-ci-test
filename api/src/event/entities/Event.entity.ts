@@ -101,8 +101,9 @@ export class Event {
     parkings: Parking[]
 
     @OneToMany(() => Enrollment, {
-        inverse: 'event',
+        inverse: 'eventId',
         joinColumn: 'eventId',
+        owner: true,
         eager: true
     })
     enrollments: Enrollment[]
