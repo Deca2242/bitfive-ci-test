@@ -37,7 +37,7 @@ export class Enrollment {
     deletedBy: string
 
     @ManyToOne(() => User, {
-        inverse: 'enrollments',
+        inverse: 'userId',
         joinColumn: 'userId',
         owner: true,
         eager: true
@@ -45,7 +45,7 @@ export class Enrollment {
     user: any
 
     @ManyToOne(() => Event, {
-        inverse: 'enrollments',
+        inverse: 'eventId',
         joinColumn: 'eventId',
         owner: true,
         eager: true

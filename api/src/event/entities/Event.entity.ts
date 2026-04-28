@@ -71,7 +71,7 @@ export class Event {
     deletedBy: string
 
     @ManyToOne(() => User, {
-        inverse: 'ownedEvents',
+        inverse: 'ownerId',
         joinColumn: 'ownerId',
         owner: true,
         eager: true
