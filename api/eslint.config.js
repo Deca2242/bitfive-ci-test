@@ -17,15 +17,9 @@ export default tseslint.config(
     },
     rules: {
       "no-unused-vars": "off",
-      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
     },
   },
-  // Opción 2 — apaga no-explicit-any solo en decoradores
-  {
-    files: ["src/core/decorators/*.ts", "src/core/container/*.ts"],
-    rules: {
-      "@typescript-eslint/no-explicit-any": "off",
-    },
-  }
+  
 );
