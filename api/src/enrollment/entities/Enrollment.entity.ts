@@ -13,7 +13,7 @@ export class Enrollment {
     id: string
 
     @Column({ type: 'date', nullable: false })
-    date: Date
+    date: Date  
 
     @Column({ type: 'string', nullable: false })
     enrollmentStatus: string
