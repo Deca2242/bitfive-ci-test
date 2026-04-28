@@ -12,7 +12,7 @@ export class Enrollment {
     @Id()
     id: string
 
-    @Column({ type: 'date', nullable: false, default: 'NOW()' })
+    @Column({ type: 'date', nullable: false })
     date: Date
 
     @Column({ type: 'string', nullable: false })
