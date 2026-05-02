@@ -156,7 +156,7 @@ jobs:
 
     container:
       # FIX 3: versión fija para evitar breaking changes de latest
-      image: returntocorp/semgrep:1.99.0
+      image: semgrep/semgrep:1.161.0
 
     steps:
       - name: Checkout
