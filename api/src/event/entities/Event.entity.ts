@@ -9,7 +9,7 @@ export class Event {
     @Id()
     id: string
 
-    @Column({ type: 'string', nullable: false })
+    @Column({ type: 'string', nullable: false   })
     name: string
 
     @Column({ type: 'string' })
