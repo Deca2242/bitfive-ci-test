@@ -4,21 +4,15 @@
 #  Frontend: /app  (JavaScript / React)
 #
 #  Jobs
-#  ├── lint    → matrix: [api, app]  type-check + eslint en ambos
-#  ├── build   → matrix: [api, app]  corre aunque lint falle
-#  └── semgrep → SAST dividido: backend (TS+Node) y frontend (JS+React)
+#  ├── lint    → matrix: [backend, frontend]
+#  ├── build   → matrix: [backend, frontend]
+#  └── semgrep → SAST dividido por path
 #
 #  Política Semgrep
-#  ├── PR → develop   : baseline scan  (solo findings nuevos, no bloquea)
-#  ├── push develop   : full scan      (visible en Security tab)
+#  ├── PR → develop   : baseline scan (solo findings nuevos)
+#  ├── push develop   : full scan (visible en Security tab)
 #  ├── PR → main      : full scan estricto (bloquea si hay ERROR)
-#  └── push main / release/* / hotfix/* : full scan estricto (bloquea)
-#
-#  Fixes aplicados
-#  ├── FIX 1: if: needs.lint.result en build   (evita correr si fue cancelado)
-#  ├── FIX 2: if: needs.build.result en semgrep (misma razón)
-#  ├── FIX 3: imagen semgrep con versión fija   (evita breaking changes en latest)
-#  └── FIX 4: permissions solo en job semgrep   (principio de mínimo privilegio)
+#  └── push main / release/* / hotfix/* : full scan estricto
 # ============================================================
 
 name: CI
@@ -44,7 +38,7 @@ env:
 
 jobs:
   # ----------------------------------------------------------
-  # 1. LINT — matrix [backend, frontend]
+  # 1. LINT
   # ----------------------------------------------------------
   lint:
     name: "Lint · ${{ matrix.name }}"
@@ -57,7 +51,6 @@ jobs:
           - name: backend
             path: api
             lang: typescript
-
           - name: frontend
             path: app
             lang: javascript
@@ -67,11 +60,9 @@ jobs:
         working-directory: ${{ matrix.path }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -88,13 +79,12 @@ jobs:
         run: npm run lint --if-present
 
   # ----------------------------------------------------------
-  # 2. BUILD — matrix [backend, frontend]
+  # 2. BUILD
   # ----------------------------------------------------------
   build:
     name: "Build · ${{ matrix.name }}"
     runs-on: ubuntu-latest
     needs: lint
-    # FIX 1: corre si lint pasó o falló, pero NO si fue cancelado
     if: needs.lint.result == 'success' || needs.lint.result == 'failure'
 
     strategy:
@@ -105,7 +95,6 @@ jobs:
             path: api
             artifact: backend-dist
             dist: api/dist
-
           - name: frontend
             path: app
             artifact: frontend-dist
@@ -116,11 +105,9 @@ jobs:
         working-directory: ${{ matrix.path }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -132,7 +119,7 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Upload build artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact }}
@@ -140,32 +127,26 @@ jobs:
           retention-days: 3
 
   # ----------------------------------------------------------
-  # 3. SEMGREP SAST — dividido por path: backend y frontend
+  # 3. SEMGREP SAST
   # ----------------------------------------------------------
   semgrep:
     name: "SAST · Semgrep"
     runs-on: ubuntu-latest
     needs: build
-    # FIX 2: corre si build pasó o falló, pero NO si fue cancelado
     if: needs.build.result == 'success' || needs.build.result == 'failure'
-
-    # FIX 4: permissions solo donde se necesitan (mínimo privilegio)
     permissions:
       contents: read
       security-events: write
-
     container:
-      # FIX 3: versión fija para evitar breaking changes de latest
       image: semgrep/semgrep:1.161.0
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # ── Calcular política según rama/evento ───────────────
-      - name: Determinar política según rama
+      # Calcula si el scan debe ser estricto o usar baseline según la rama
+      - name: Determinar política
         id: policy
         run: |
           STRICT="false"
@@ -189,8 +170,7 @@ jobs:
           echo "strict=$STRICT"     >> $GITHUB_OUTPUT
           echo "baseline=$BASELINE" >> $GITHUB_OUTPUT
 
-      # ── Scan BACKEND — solo packs relevantes para /api ────
-      # TypeScript + Node.js: sin React, sin reglas de browser
+      # Packs: p/ci · p/security-audit · p/secrets · p/typescript · p/nodejs
       - name: Semgrep · Backend (/api)
         run: |
           STRICT_FLAGS=""
@@ -213,8 +193,7 @@ jobs:
             --sarif --output=results-backend.sarif \
             ./api
 
-      # ── Scan FRONTEND — solo packs relevantes para /app ───
-      # JavaScript + React: sin Node.js, sin reglas de servidor
+      # Packs: p/ci · p/security-audit · p/secrets · p/javascript · p/react
       - name: Semgrep · Frontend (/app)
         run: |
           STRICT_FLAGS=""
@@ -241,17 +220,16 @@ jobs:
             --sarif --output=results-frontend.sarif \
             ./app
 
-      # ── Publicar ambos reportes en Security tab ───────────
       - name: Publicar SARIF Backend
         if: always()
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: results-backend.sarif
-          category: semgrep-backend   # ← separa los resultados en la UI
+          category: semgrep-backend
 
       - name: Publicar SARIF Frontend
         if: always()
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: results-frontend.sarif
-          category: semgrep-frontend  # ← separa los resultados en la UI
+          category: semgrep-frontend
