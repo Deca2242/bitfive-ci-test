@@ -191,13 +191,25 @@ jobs:
 
           semgrep scan \
             --config=p/ci \
+            --config=p/security-audit \
+            --config=p/secrets \
             --config=p/javascript \
             --config=p/typescript \
-            --config=p/secrets \
+            --config=p/nodejs \
+            --config=p/react \
+            --exclude=node_modules \
+            --exclude=dist \
+            --exclude=build \
+            --exclude=coverage \
+            --exclude=.vite \
+            --exclude=.turbo \
+            --exclude=.next \
+            --exclude='*.min.js' \
             ${{ steps.policy.outputs.baseline }} \
             $STRICT_FLAGS \
             --sarif --output=results.sarif \
             ./api ./app
+
 
       - name: Publicar SARIF en Security tab
         if: always()

@@ -1,0 +1,50 @@
+# ============================================================
+#  .semgrepignore
+#  Excluye carpetas y archivos que Semgrep no debe analizar.
+#  Funciona igual que .gitignore — una regla por línea.
+# ============================================================
+
+# ── Dependencias ────────────────────────────────────────────
+node_modules/
+**/node_modules/
+
+# ── Outputs de build ────────────────────────────────────────
+dist/
+build/
+out/
+.next/
+.nuxt/
+
+# ── Cache de herramientas ────────────────────────────────────
+.vite/
+.turbo/
+.cache/
+coverage/
+.nyc_output/
+
+# ── Archivos minificados / generados ────────────────────────
+*.min.js
+*.min.css
+*.bundle.js
+*.chunk.js
+
+# ── Archivos de configuración de entorno ────────────────────
+.env
+.env.*
+*.local
+
+# ── Archivos de configuración de herramientas ───────────────
+*.config.js
+*.config.ts
+*.config.mjs
+vite.config.*
+jest.config.*
+webpack.config.*
+babel.config.*
+tailwind.config.*
+postcss.config.*
+
+# ── Archivos de lock ─────────────────────────────────────────
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
