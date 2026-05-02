@@ -1,18 +1,24 @@
 # ============================================================
 #  CI Pipeline — bitfive monorepo
 #  Backend : /api  (TypeScript / Node.js)
-#  Frontend: /app  (JavaScript)
+#  Frontend: /app  (JavaScript / React)
 #
 #  Jobs
 #  ├── lint    → matrix: [api, app]  type-check + eslint en ambos
-#  ├── build   → matrix: [api, app]  corre aunque lint falle (if: always)
-#  └── semgrep → SAST con política según rama (Gitflow)
+#  ├── build   → matrix: [api, app]  corre aunque lint falle
+#  └── semgrep → SAST dividido: backend (TS+Node) y frontend (JS+React)
 #
 #  Política Semgrep
 #  ├── PR → develop   : baseline scan  (solo findings nuevos, no bloquea)
 #  ├── push develop   : full scan      (visible en Security tab)
 #  ├── PR → main      : full scan estricto (bloquea si hay ERROR)
 #  └── push main / release/* / hotfix/* : full scan estricto (bloquea)
+#
+#  Fixes aplicados
+#  ├── FIX 1: if: needs.lint.result en build   (evita correr si fue cancelado)
+#  ├── FIX 2: if: needs.build.result en semgrep (misma razón)
+#  ├── FIX 3: imagen semgrep con versión fija   (evita breaking changes en latest)
+#  └── FIX 4: permissions solo en job semgrep   (principio de mínimo privilegio)
 # ============================================================
 
 name: CI
@@ -28,11 +34,7 @@ on:
     branches:
       - main
       - develop
-      
-permissions:
-  contents: read
-  security-events: write
-  
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -78,13 +80,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # FIX 1: indentación correcta dentro de steps
-      # Solo corre en backend (TypeScript)
       - name: TypeScript type-check
         if: matrix.lang == 'typescript'
         run: npx tsc --noEmit
 
-      # FIX 2: ESLint corre en backend Y frontend (sin condicional)
       - name: ESLint
         run: npm run lint --if-present
 
@@ -95,9 +94,8 @@ jobs:
     name: "Build · ${{ matrix.name }}"
     runs-on: ubuntu-latest
     needs: lint
-    # FIX 3: if always() para que build corra aunque lint haya fallado
-    # y la matrix se expanda correctamente
-    if: always()
+    # FIX 1: corre si lint pasó o falló, pero NO si fue cancelado
+    if: needs.lint.result == 'success' || needs.lint.result == 'failure'
 
     strategy:
       fail-fast: false
@@ -111,7 +109,7 @@ jobs:
           - name: frontend
             path: app
             artifact: frontend-dist
-            dist: app/dist      # ajusta si tu salida es build/, out/, etc.
+            dist: app/dist
 
     defaults:
       run:
@@ -142,15 +140,23 @@ jobs:
           retention-days: 3
 
   # ----------------------------------------------------------
-  # 3. SEMGREP SAST — Análisis de seguridad estático
+  # 3. SEMGREP SAST — dividido por path: backend y frontend
   # ----------------------------------------------------------
   semgrep:
     name: "SAST · Semgrep"
     runs-on: ubuntu-latest
     needs: build
-    if: always()
+    # FIX 2: corre si build pasó o falló, pero NO si fue cancelado
+    if: needs.build.result == 'success' || needs.build.result == 'failure'
+
+    # FIX 4: permissions solo donde se necesitan (mínimo privilegio)
+    permissions:
+      contents: read
+      security-events: write
+
     container:
-      image: returntocorp/semgrep
+      # FIX 3: versión fija para evitar breaking changes de latest
+      image: returntocorp/semgrep:1.99.0
 
     steps:
       - name: Checkout
@@ -158,6 +164,7 @@ jobs:
         with:
           fetch-depth: 0
 
+      # ── Calcular política según rama/evento ───────────────
       - name: Determinar política según rama
         id: policy
         run: |
@@ -182,7 +189,33 @@ jobs:
           echo "strict=$STRICT"     >> $GITHUB_OUTPUT
           echo "baseline=$BASELINE" >> $GITHUB_OUTPUT
 
-      - name: Ejecutar Semgrep
+      # ── Scan BACKEND — solo packs relevantes para /api ────
+      # TypeScript + Node.js: sin React, sin reglas de browser
+      - name: Semgrep · Backend (/api)
+        run: |
+          STRICT_FLAGS=""
+          if [ "${{ steps.policy.outputs.strict }}" = "true" ]; then
+            STRICT_FLAGS="--error --severity=ERROR"
+          fi
+
+          semgrep scan \
+            --config=p/ci \
+            --config=p/security-audit \
+            --config=p/secrets \
+            --config=p/typescript \
+            --config=p/nodejs \
+            --exclude=node_modules \
+            --exclude=dist \
+            --exclude=coverage \
+            --exclude='*.min.js' \
+            ${{ steps.policy.outputs.baseline }} \
+            $STRICT_FLAGS \
+            --sarif --output=results-backend.sarif \
+            ./api
+
+      # ── Scan FRONTEND — solo packs relevantes para /app ───
+      # JavaScript + React: sin Node.js, sin reglas de servidor
+      - name: Semgrep · Frontend (/app)
         run: |
           STRICT_FLAGS=""
           if [ "${{ steps.policy.outputs.strict }}" = "true" ]; then
@@ -194,8 +227,6 @@ jobs:
             --config=p/security-audit \
             --config=p/secrets \
             --config=p/javascript \
-            --config=p/typescript \
-            --config=p/nodejs \
             --config=p/react \
             --exclude=node_modules \
             --exclude=dist \
@@ -207,12 +238,20 @@ jobs:
             --exclude='*.min.js' \
             ${{ steps.policy.outputs.baseline }} \
             $STRICT_FLAGS \
-            --sarif --output=results.sarif \
-            ./api ./app
+            --sarif --output=results-frontend.sarif \
+            ./app
 
-
-      - name: Publicar SARIF en Security tab
+      # ── Publicar ambos reportes en Security tab ───────────
+      - name: Publicar SARIF Backend
         if: always()
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: results.sarif
+          sarif_file: results-backend.sarif
+          category: semgrep-backend   # ← separa los resultados en la UI
+
+      - name: Publicar SARIF Frontend
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results-frontend.sarif
+          category: semgrep-frontend  # ← separa los resultados en la UI
